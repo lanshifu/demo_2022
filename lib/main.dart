@@ -1,9 +1,69 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  runApp(const MyApp());
+import 'example/counter_widget.dart';
+import 'example/provider/sharedPreferencesProvider.dart';
+
+class Logger extends ProviderObserver {
+  @override
+  void didUpdateProvider(
+    ProviderBase provider,
+    Object? previousValue,
+    Object? newValue,
+    ProviderContainer container,
+  ) {
+    print('[${provider.name ?? provider.runtimeType}] value: $newValue');
+  }
+}
+
+void collectLog(String line) {
+  //收集日志
+}
+void reportErrorAndLog(FlutterErrorDetails details) {
+  //上报错误和日志逻辑
+  print("reportErrorAndLog:${details.toString()}");
+}
+
+FlutterErrorDetails makeDetails(Object obj, StackTrace stack) {
+  // 构建错误信息
+  return FlutterErrorDetails(exception: Exception(stack.toString()));
+}
+
+void main() async {
+  var onError = FlutterError.onError; //先将 onerror 保存起来
+  FlutterError.onError = (FlutterErrorDetails details) {
+    onError?.call(details); //调用默认的onError
+    reportErrorAndLog(details); //上报
+  };
+
+  final sharedPreferences = await SharedPreferences.getInstance();
+
+  runZoned(
+    () => runApp(ProviderScope(
+      observers: [Logger()],
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(sharedPreferences),
+      ],
+      child: const MyApp(),
+    )),
+    zoneSpecification: ZoneSpecification(
+      // 拦截print
+      print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
+        collectLog(line);
+        parent.print(zone, "Interceptor: $line");
+      },
+      // 拦截未处理的异步错误
+      handleUncaughtError: (Zone self, ZoneDelegate parent, Zone zone,
+          Object error, StackTrace stackTrace) {
+        reportErrorAndLog(makeDetails(error, stackTrace));
+        parent.print(zone, '${error.toString()} $stackTrace');
+      },
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -26,7 +86,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const CounterWidget(),
     );
   }
 }
@@ -124,34 +184,33 @@ class _GoodsListPageState extends State<GoodsListPage> {
                   child: Row(
                     children: <Widget>[
                       Expanded(
-                        child: Builder(
-                          builder: (context) {
-                            return GestureDetector(
-                              onTap: (){
-                                // 点击的时候获取当前 widget 的位置，传入 overlayEntry
-                                var _overlayEntry = OverlayEntry(builder: (_) {
-
-                                  var offset =  (context.findRenderObject() as RenderBox)
-                                      .localToGlobal(Offset.zero);
-                                  return RedDotPage(
-                                    startPosition: offset,
-                                    endPosition: _endOffset,
-                                  );
-                                });
-                                // 显示Overlay
-                                Overlay.of(context)?.insert(_overlayEntry);
-                                // 等待动画结束
-                                Future.delayed(Duration(milliseconds: 500), () {
-                                  _overlayEntry.remove();
-                                });
-                              },
-                              child: Text(
-                                '我是商品名称$index',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                            );
-                          }
-                        ),
+                        child: Builder(builder: (context) {
+                          return GestureDetector(
+                            onTap: () {
+                              // 点击的时候获取当前 widget 的位置，传入 overlayEntry
+                              var _overlayEntry = OverlayEntry(builder: (_) {
+                                var offset =
+                                    (context.findRenderObject() as RenderBox)
+                                        .localToGlobal(Offset.zero);
+                                return RedDotPage(
+                                  startPosition: offset,
+                                  endPosition: _endOffset,
+                                  milliseconds: 4000,
+                                );
+                              });
+                              // 显示Overlay
+                              Overlay.of(context)?.insert(_overlayEntry);
+                              // 等待动画结束
+                              Future.delayed(Duration(milliseconds: 4000), () {
+                                _overlayEntry.remove();
+                              });
+                            },
+                            child: Text(
+                              '我是商品名称$index',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          );
+                        }),
                       ),
                       Builder(
                         builder: (context) {
@@ -160,12 +219,13 @@ class _GoodsListPageState extends State<GoodsListPage> {
                             onPressed: () {
                               // 点击的时候获取当前 widget 的位置，传入 overlayEntry
                               var _overlayEntry = OverlayEntry(builder: (_) {
-
-                                var offset =  (context.findRenderObject() as RenderBox)
-                                    .localToGlobal(Offset.zero);
+                                var offset =
+                                    (context.findRenderObject() as RenderBox)
+                                        .localToGlobal(Offset.zero);
                                 return RedDotPage(
                                   startPosition: offset,
                                   endPosition: _endOffset,
+                                  milliseconds: 500,
                                 );
                               });
                               // 显示Overlay
@@ -210,12 +270,13 @@ class _GoodsListPageState extends State<GoodsListPage> {
   }
 }
 
-
 class RedDotPage extends StatefulWidget {
   final Offset? startPosition;
   final Offset? endPosition;
+  final int? milliseconds;
 
-  const RedDotPage({Key? key, this.startPosition, this.endPosition})
+  const RedDotPage(
+      {Key? key, this.startPosition, this.endPosition, this.milliseconds})
       : super(key: key);
 
   @override
@@ -232,8 +293,8 @@ class _RedDotPageState extends State<RedDotPage>
   @override
   void initState() {
     super.initState();
-    _controller =
-        AnimationController(duration: Duration(milliseconds: 500), vsync: this);
+    _controller = AnimationController(
+        duration: Duration(milliseconds: widget.milliseconds!), vsync: this);
     _animation = Tween(begin: 0.0, end: 1.0).animate(_controller!);
 
     // 二阶贝塞尔曲线用值
@@ -271,12 +332,25 @@ class _RedDotPageState extends State<RedDotPage>
     return Positioned(
       left: left,
       top: top,
-      child: ClipOval(
-        child: Container(
-          width: 14,
-          height: 14,
-          color: Colors.red,
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipOval(
+            child: Container(
+              width: 14,
+              height: 14,
+              color: Colors.red,
+            ),
+          ),
+          Text(
+            "left:$left",
+            style: TextStyle(fontSize: 12),
+          ),
+          Text(
+            "top:$top",
+            style: TextStyle(fontSize: 12),
+          ),
+        ],
       ),
     );
   }
