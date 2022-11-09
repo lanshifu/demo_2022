@@ -3,9 +3,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'example/counter_widget.dart';
 import 'example/provider/sharedPreferencesProvider.dart';
 
 class Logger extends ProviderObserver {
@@ -23,6 +23,7 @@ class Logger extends ProviderObserver {
 void collectLog(String line) {
   //收集日志
 }
+
 void reportErrorAndLog(FlutterErrorDetails details) {
   //上报错误和日志逻辑
   print("reportErrorAndLog:${details.toString()}");
@@ -40,13 +41,13 @@ void main() async {
     reportErrorAndLog(details); //上报
   };
 
-  final sharedPreferences = await SharedPreferences.getInstance();
+  // final sharedPreferences = await SharedPreferences.getInstance();
 
   runZoned(
     () => runApp(ProviderScope(
       observers: [Logger()],
       overrides: [
-        sharedPreferencesProvider.overrideWithValue(sharedPreferences),
+        // sharedPreferencesProvider.overrideWithValue(sharedPreferences),
       ],
       child: const MyApp(),
     )),
@@ -86,9 +87,22 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const CounterWidget(),
+      // home: const CounterWidget(),
+      home: getLottieWidget(),
     );
   }
+}
+
+Widget getLottieWidget() {
+  return Container(
+    color: Colors.deepOrangeAccent,
+    child: Lottie.asset(
+      'assets/lottie_login/lottie_login.json',
+      width: 1125,
+      height: 7000,
+      fit: BoxFit.cover,
+    ),
+  );
 }
 
 class MyHomePage extends StatefulWidget {
