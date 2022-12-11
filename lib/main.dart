@@ -1,11 +1,18 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:demo_2022/page_view/page_view_2.dart';
+import 'package:demo_2022/page_view/transforms/CubeTransform.dart';
+import 'package:demo_2022/page_view/transforms/RotateTransform.dart';
+import 'package:demo_2022/page_view/transforms/StackTransform.dart';
+import 'package:demo_2022/page_view/view_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'PagerView.dart';
+import 'ScaleList.dart';
 import 'example/provider/sharedPreferencesProvider.dart';
 
 class Logger extends ProviderObserver {
@@ -49,7 +56,7 @@ void main() async {
       overrides: [
         // sharedPreferencesProvider.overrideWithValue(sharedPreferences),
       ],
-      child: const MyApp(),
+      child: MyApp(),
     )),
     zoneSpecification: ZoneSpecification(
       // 拦截print
@@ -88,7 +95,15 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       // home: const CounterWidget(),
-      home: getLottieWidget(),
+      home: Container(
+        height: double.infinity,
+        color: Colors.white,
+        child: Stack(
+          children: [
+            PageView2(),
+          ],
+        ),
+      ),
     );
   }
 }
