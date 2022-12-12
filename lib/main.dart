@@ -95,13 +95,45 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       // home: const CounterWidget(),
-      home: Container(
-        height: double.infinity,
-        color: Colors.white,
-        child: Stack(
-          children: [
-            PageView2(),
-          ],
+      home: Material(
+        child: Container(
+          height: double.infinity,
+          color: Colors.white,
+          child: Stack(
+            children: [
+              Positioned(
+                bottom: 100,
+                left: 0,
+                child: InkWell(
+                  onTap: () {
+                    print('点击black');
+                  },
+                  child: Container(
+                      color: Colors.black,
+                      child: Text(
+                        '点击',
+                        style: TextStyle(fontSize: 80, color: Colors.white),
+                      )),
+                ),
+              ),
+              Positioned(
+                bottom: 140,
+                left: 0,
+                child: InkWell(
+                  onTap: () {
+                    print('点击了red');
+                  },
+                  child: Container(
+                      color: Colors.red,
+                      child: Text(
+                        '点击',
+                        style: TextStyle(fontSize: 80, color: Colors.white),
+                      )),
+                ),
+              ),
+              PageView2(),
+            ],
+          ),
         ),
       ),
     );

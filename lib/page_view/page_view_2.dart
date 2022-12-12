@@ -24,7 +24,6 @@ class _PageView2State extends State<PageView2> {
     /// 要跑到顶部去
     return Container(
       width: double.infinity,
-      color: Colors.white,
       child: Stack(
         children: [
           Positioned(
@@ -65,15 +64,17 @@ class _PageView2State extends State<PageView2> {
     // }
 
     return Center(
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.blue,
-          borderRadius: BorderRadius.circular(25),
+      child: IgnorePointer(
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.blue,
+            borderRadius: BorderRadius.circular(25),
+          ),
+          margin: EdgeInsets.only(left: 20, right: 16, bottom: 20),
+          width: double.infinity,
+          height: 200,
+          child: Text("这是文章$index"),
         ),
-        margin: EdgeInsets.only(left: 16, right: 16, bottom: 16),
-        width: double.infinity,
-        height: 200,
-        child: Text("这是文章$index"),
       ),
     );
   }
