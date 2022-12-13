@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/widgets.dart';
 
 import '../view_page.dart';
@@ -34,7 +32,7 @@ class StackTransform extends PageTransform {
 
       /// pageOffset: 页面偏移 （0.0-1.0）
 
-      var topPadding = pageOffset * topPaddingOffset;
+      var topPadding = pageOffset * topPaddingOffset * 0.5;
 
       opacity = 1 - (pageOffset / 3);
 
@@ -58,6 +56,9 @@ class StackTransform extends PageTransform {
         opacity = 1;
       }
 
+      scale = 1.0;
+      opacity = 1.0;
+
       ///index=0,page=0.998071930825017,aniValue=0.0019280691749830048，pageOffset=0.998071930825017,topPadding=179.65294754850305
       print(
           'index=$index,page=${page.toStringAsFixed(2)},scale=${scale.toStringAsFixed(2)}，'
@@ -68,7 +69,7 @@ class StackTransform extends PageTransform {
         maxHeight: maxHeight,
         child: Container(
           height: childHeight,
-          margin: EdgeInsets.only(top: topPadding),
+          // margin: EdgeInsets.only(top: topPadding),
           child: Opacity(
             opacity: opacity,
             child: Transform.scale(

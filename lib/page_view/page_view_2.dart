@@ -14,7 +14,7 @@ class PageView2 extends StatefulWidget {
 class _PageView2State extends State<PageView2> {
   @override
   Widget build(BuildContext context) {
-    var topPadding = -500.0;
+    var topPadding = -400.0;
 
     ///屏幕高度除以item高度，计算处出 viewportFraction
     var screenHeight = MediaQuery.of(context).size.height - topPadding;
@@ -35,7 +35,7 @@ class _PageView2State extends State<PageView2> {
               // visible: false,
               visible: true,
               child: PageViewJ(
-                itemCount: 4,
+                itemCount: 10,
                 modifier: Modifier(
                     viewportFraction: viewportFraction,
                     scrollDirection: Axis.vertical,

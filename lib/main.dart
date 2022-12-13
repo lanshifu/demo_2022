@@ -2,18 +2,11 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:demo_2022/page_view/page_view_2.dart';
-import 'package:demo_2022/page_view/transforms/CubeTransform.dart';
-import 'package:demo_2022/page_view/transforms/RotateTransform.dart';
-import 'package:demo_2022/page_view/transforms/StackTransform.dart';
-import 'package:demo_2022/page_view/view_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import 'PagerView.dart';
-import 'ScaleList.dart';
-import 'example/provider/sharedPreferencesProvider.dart';
+import 'expan/LearnExpansionPanelList.dart';
 
 class Logger extends ProviderObserver {
   @override
@@ -80,6 +73,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    // child: testEvent(child),
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -98,46 +92,114 @@ class MyApp extends StatelessWidget {
       home: Material(
         child: Container(
           height: double.infinity,
-          color: Colors.white,
+          color: Colors.deepOrangeAccent,
+          // child: testListView(),
           child: Stack(
             children: [
-              Positioned(
-                bottom: 100,
-                left: 0,
-                child: InkWell(
-                  onTap: () {
-                    print('点击black');
-                  },
-                  child: Container(
-                      color: Colors.black,
-                      child: Text(
-                        '点击',
-                        style: TextStyle(fontSize: 80, color: Colors.white),
-                      )),
-                ),
-              ),
-              Positioned(
-                bottom: 140,
-                left: 0,
-                child: InkWell(
-                  onTap: () {
-                    print('点击了red');
-                  },
-                  child: Container(
-                      color: Colors.red,
-                      child: Text(
-                        '点击',
-                        style: TextStyle(fontSize: 80, color: Colors.white),
-                      )),
-                ),
-              ),
-              PageView2(),
+              testListView(),
+              Column(
+                children: [
+                  LearnExpansionPanelList(),
+                  Expanded(child: const Text('')),
+                ],
+              )
             ],
           ),
         ),
       ),
     );
   }
+}
+
+Widget testListView() {
+  return Stack(
+    children: [
+      Positioned(
+        bottom: 100,
+        left: 0,
+        child: InkWell(
+          onTap: () {
+            print('点击black');
+          },
+          child: Container(
+              color: Colors.black,
+              child: Text(
+                '点击',
+                style: TextStyle(fontSize: 80, color: Colors.white),
+              )),
+        ),
+      ),
+      Positioned(
+        bottom: 140,
+        left: 0,
+        child: InkWell(
+          onTap: () {
+            print('点击了red');
+          },
+          child: Container(
+              color: Colors.red,
+              child: const Text(
+                '点击',
+                style: TextStyle(fontSize: 80, color: Colors.white),
+              )),
+        ),
+      ),
+      const PageView2(),
+      Positioned(
+        top: 0,
+        left: 0,
+        right: 0,
+        child: Container(
+          height: 100,
+          color: Colors.black26,
+          child: InkWell(
+            onTap: () {
+              print("onTap ");
+            },
+            child: Container(
+              color: Colors.transparent, //透明颜色
+              child: GestureDetector(
+                onTap: () {
+                  print("___test");
+                },
+                child: Text(
+                  "点击",
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+Widget testEvent() {
+  return Stack(
+    children: <Widget>[
+      Listener(
+        child: ConstrainedBox(
+          constraints: BoxConstraints.tight(Size(300.0, 300.0)),
+          child: DecoratedBox(decoration: BoxDecoration(color: Colors.red)),
+        ),
+        onPointerDown: (event) => print("red"),
+      ),
+      Listener(
+        child: ConstrainedBox(
+          constraints: BoxConstraints.tight(Size(300.0, 300.0)),
+          child: Center(
+              child: Container(
+                  width: 100,
+                  height: 100,
+                  color: Colors.black45,
+                  child: Text("上层左上角200*200范围内-空白区域点击"))),
+        ),
+        onPointerDown: (event) => print("text"),
+        //放开此行注释后，单词点击 first ,second都会响应，HitTestBehavior.opaque是不行的
+        behavior: HitTestBehavior.translucent,
+      )
+    ],
+  );
 }
 
 Widget getLottieWidget() {
