@@ -65,34 +65,26 @@ class _LearnExpansionPanelList extends State<LearnExpansionPanelList>
     // }
     print('_reaction = ${_reaction.value},listBottom=$listBottom');
     return Container(
-      child: Column(
+      child: Stack(
         children: <Widget>[
-          Container(
-            height: 30,
-            width: double.infinity,
-            alignment: Alignment.bottomCenter,
-            child: Stack(
-              children: [],
-            ),
-          ),
           Visibility(
             visible: !currentPanelExpand,
             child: Container(
-              margin: EdgeInsets.only(top: 0),
-              height: 210,
+              margin: EdgeInsets.only(top: 30),
+              height: 206,
               child: Stack(
                 children: [
                   Positioned(
                     bottom: 20,
                     right: 20,
                     left: 20,
-                    child: _buildItem(0),
+                    child: Opacity(opacity: 0.8, child: _buildItem(0)),
                   ),
                   Positioned(
                     bottom: 10,
                     left: 10,
                     right: 10,
-                    child: _buildItem(0),
+                    child: Opacity(opacity: 0.9, child: _buildItem(0)),
                   ),
                   Positioned(
                     bottom: 0,
@@ -106,21 +98,34 @@ class _LearnExpansionPanelList extends State<LearnExpansionPanelList>
           ),
           Visibility(
             visible: !currentPanelExpand,
-            child: GestureDetector(
-              onTap: () {
-                /// 展开动画
-                startOpenAnim();
-                isOpenAnim = true;
-                setState(() {
-                  currentPanelExpand = true;
-                });
-              },
-              child: Text('展开（2条申请）'),
+            child: Positioned(
+              left: 0,
+              right: 0,
+              top: 166,
+              child: GestureDetector(
+                onTap: () {
+                  /// 展开动画
+                  startOpenAnim();
+                  isOpenAnim = true;
+                  setState(() {
+                    currentPanelExpand = true;
+                  });
+                },
+                child: Container(
+                  child: Center(
+                    child: Text(
+                      '展开（2条申请）',
+                      style: TextStyle(color: Colors.red, fontSize: 20),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
           Visibility(
             visible: currentPanelExpand,
             child: Container(
+              margin: EdgeInsets.only(top: 0),
               height: listBottom,
               child: ListView(
                 shrinkWrap: false,
@@ -137,14 +142,24 @@ class _LearnExpansionPanelList extends State<LearnExpansionPanelList>
           ),
           Visibility(
             visible: currentPanelExpand,
-            child: GestureDetector(
-              onTap: () {
-                /// 收起动画
+            child: Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: GestureDetector(
+                onTap: () {
+                  /// 收起动画
 
-                startOpenAnim();
-                isOpenAnim = false;
-              },
-              child: Text('收起'),
+                  startOpenAnim();
+                  isOpenAnim = false;
+                },
+                child: Container(
+                  child: Center(
+                    child: Text('收起',
+                        style: TextStyle(color: Colors.red, fontSize: 20)),
+                  ),
+                ),
+              ),
             ),
           ),
         ],
@@ -165,8 +180,8 @@ class _LearnExpansionPanelList extends State<LearnExpansionPanelList>
 
   Widget _buildItem(int index) {
     return Container(
-      margin: EdgeInsets.all(16),
-      padding: EdgeInsets.all(24),
+      margin: EdgeInsets.all(20),
+      padding: EdgeInsets.all(20),
       width: double.infinity,
       height: 166,
       decoration: BoxDecoration(
