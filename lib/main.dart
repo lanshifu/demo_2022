@@ -1,486 +1,137 @@
-import 'dart:async';
-import 'dart:math';
+import 'dart:convert';
 
-import 'package:demo_2022/page_view/page_view_2.dart';
+import 'package:fair/fair.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lottie/lottie.dart';
 
-import 'expan/LearnExpansionPanelList.dart';
+// import 'src/generated.fair.dart' as g;
 
-class Logger extends ProviderObserver {
-  @override
-  void didUpdateProvider(
-    ProviderBase provider,
-    Object? previousValue,
-    Object? newValue,
-    ProviderContainer container,
-  ) {
-    print('[${provider.name ?? provider.runtimeType}] value: $newValue');
-  }
-}
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
 
-void collectLog(String line) {
-  //收集日志
-}
-
-void reportErrorAndLog(FlutterErrorDetails details) {
-  //上报错误和日志逻辑
-  print("reportErrorAndLog:${details.toString()}");
-}
-
-FlutterErrorDetails makeDetails(Object obj, StackTrace stack) {
-  // 构建错误信息
-  return FlutterErrorDetails(exception: Exception(stack.toString()));
-}
-
-void main() async {
-  var onError = FlutterError.onError; //先将 onerror 保存起来
-  FlutterError.onError = (FlutterErrorDetails details) {
-    onError?.call(details); //调用默认的onError
-    reportErrorAndLog(details); //上报
-  };
-
-  // final sharedPreferences = await SharedPreferences.getInstance();
-
-  runZoned(
-    () => runApp(ProviderScope(
-      observers: [Logger()],
-      overrides: [
-        // sharedPreferencesProvider.overrideWithValue(sharedPreferences),
-      ],
-      child: MyApp(),
-    )),
-    zoneSpecification: ZoneSpecification(
-      // 拦截print
-      print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
-        collectLog(line);
-        parent.print(zone, "Interceptor: $line");
-      },
-      // 拦截未处理的异步错误
-      handleUncaughtError: (Zone self, ZoneDelegate parent, Zone zone,
-          Object error, StackTrace stackTrace) {
-        reportErrorAndLog(makeDetails(error, stackTrace));
-        parent.print(zone, '${error.toString()} $stackTrace');
-      },
-    ),
+  FairApp.runApplication(
+    _getApp(),
+    plugins: {},
   );
 }
+
+dynamic _getApp() => FairApp(
+      modules: {},
+      delegate: {},
+      // generated: g.AppGeneratedModule(),
+      // child: MyApp(),
+      child: MyFairApp(),
+    );
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    // child: testEvent(child),
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      // home: const CounterWidget(),
-      home: Material(
-        child: Container(
-          height: double.infinity,
-          color: Colors.deepOrangeAccent,
-          // child: testListView(),
-          child: Stack(
-            children: [
-              // testListView(),
-              Column(
-                children: [
-                  LearnExpansionPanelList(),
-                  Expanded(child: const Text('')),
-                ],
-              )
-            ],
-          ),
-        ),
+      home: MyHomePage(
+        fairProps: {'title': 'Flutter Demo Home Page'},
       ),
     );
   }
 }
 
-Widget testListView() {
-  return Stack(
-    children: [
-      Positioned(
-        bottom: 100,
-        left: 0,
-        child: InkWell(
-          onTap: () {
-            print('点击black');
-          },
-          child: Container(
-              color: Colors.black,
-              child: Text(
-                '点击',
-                style: TextStyle(fontSize: 80, color: Colors.white),
-              )),
+class MyFairApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
         ),
-      ),
-      Positioned(
-        bottom: 140,
-        left: 0,
-        child: InkWell(
-          onTap: () {
-            print('点击了red');
-          },
-          child: Container(
-              color: Colors.red,
-              child: const Text(
-                '点击',
-                style: TextStyle(fontSize: 80, color: Colors.white),
-              )),
-        ),
-      ),
-      const PageView2(),
-      Positioned(
-        top: 0,
-        left: 0,
-        right: 0,
-        child: Container(
-          height: 100,
-          color: Colors.black26,
-          child: InkWell(
-            onTap: () {
-              print("onTap ");
-            },
-            child: Container(
-              color: Colors.transparent, //透明颜色
-              child: GestureDetector(
-                onTap: () {
-                  print("___test");
-                },
-                child: Text(
-                  "点击",
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    ],
-  );
+        // home: MyHomePage(title: 'Flutter Demo Home Page'),
+
+        /// FairWidget 是用来加载 bundle 资源的容器
+        ///
+        /// path 参数：需要加载的 bundle 资源文件路径
+        /// data 参数：需要传递给动态页面的参数
+        home: FairWidget(
+
+            /// path 可以是 assets 目录下的 bundle 资源，也可以是手机存储
+            /// 里的 bundle 资源，如果是手机存储里的 bundle 资源需要使用绝对路径
+            path: 'assets/bundle/lib_main.fair.json',
+            data: {
+              /// 此处的 key 必须是 fairProps，不可以自定义
+              /// value 是一个 Map 类型的数据，最好是进行 jsonEncode() 操作
+              'fairProps': jsonEncode({'title': '你好'})
+            }));
+  }
 }
 
-Widget testEvent() {
-  return Stack(
-    children: <Widget>[
-      Listener(
-        child: ConstrainedBox(
-          constraints: BoxConstraints.tight(Size(300.0, 300.0)),
-          child: DecoratedBox(decoration: BoxDecoration(color: Colors.red)),
-        ),
-        onPointerDown: (event) => print("red"),
-      ),
-      Listener(
-        child: ConstrainedBox(
-          constraints: BoxConstraints.tight(Size(300.0, 300.0)),
-          child: Center(
-              child: Container(
-                  width: 100,
-                  height: 100,
-                  color: Colors.black45,
-                  child: Text("上层左上角200*200范围内-空白区域点击"))),
-        ),
-        onPointerDown: (event) => print("text"),
-        //放开此行注释后，单词点击 first ,second都会响应，HitTestBehavior.opaque是不行的
-        behavior: HitTestBehavior.translucent,
-      )
-    ],
-  );
-}
-
-Widget getLottieWidget() {
-  return Container(
-    color: Colors.deepOrangeAccent,
-    child: Lottie.asset(
-      'assets/lottie_login/lottie_login.json',
-      width: 1125,
-      height: 7000,
-      fit: BoxFit.cover,
-    ),
-  );
-}
-
+@FairPatch()
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+  MyHomePage({Key? key, this.fairProps}) : super(key: key);
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+  dynamic fairProps;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  /// 定义与 JS 侧交互的参数，只支持 Map 类型的数据
+  ///
+  /// 需要用 @FairProps() 注解标记
+  /// 变量名可以自定义，习惯上命名为 fairProps
+  @FairProps()
+  var fairProps;
+
   int _counter = 0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    /// 需要将 widget.fairProps 赋值给 fairProps
+    fairProps = widget.fairProps;
+  }
+
+  String getTitle() {
+    return fairProps['title'];
+  }
 
   void _incrementCounter() {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
       _counter++;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: Text(getTitle()),
       ),
-      body: GoodsListPage(),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Text(
+              'You have pushed the button this many times:',
+            ),
+            Text(
+              '$_counter',
+              // 暂不支持 style: Theme.of(context).textTheme.headline4,
+              // 可替换成:
+              style: TextStyle(
+                  fontSize: 40, color: Color(0xffeb4237), wordSpacing: 0),
+            ),
+          ],
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
         child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
-  }
-}
-
-class GoodsListPage extends StatefulWidget {
-  @override
-  _GoodsListPageState createState() => _GoodsListPageState();
-}
-
-class _GoodsListPageState extends State<GoodsListPage> {
-  GlobalKey _key = GlobalKey();
-  Offset? _endOffset;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance?.addPostFrameCallback((c) {
-      // 获取「购物车」的位置
-      _endOffset = (_key.currentContext?.findRenderObject() as RenderBox)
-          .localToGlobal(Offset.zero);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text('添加购物车'),
-      ),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: ListView.builder(
-              itemBuilder: (BuildContext context, int index) {
-                return Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  height: 50,
-                  child: Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Builder(builder: (context) {
-                          return GestureDetector(
-                            onTap: () {
-                              // 点击的时候获取当前 widget 的位置，传入 overlayEntry
-                              var _overlayEntry = OverlayEntry(builder: (_) {
-                                var offset =
-                                    (context.findRenderObject() as RenderBox)
-                                        .localToGlobal(Offset.zero);
-                                return RedDotPage(
-                                  startPosition: offset,
-                                  endPosition: _endOffset,
-                                  milliseconds: 4000,
-                                );
-                              });
-                              // 显示Overlay
-                              Overlay.of(context)?.insert(_overlayEntry);
-                              // 等待动画结束
-                              Future.delayed(Duration(milliseconds: 4000), () {
-                                _overlayEntry.remove();
-                              });
-                            },
-                            child: Text(
-                              '我是商品名称$index',
-                              style: TextStyle(fontSize: 16),
-                            ),
-                          );
-                        }),
-                      ),
-                      Builder(
-                        builder: (context) {
-                          return IconButton(
-                            icon: Icon(Icons.add_circle_outline),
-                            onPressed: () {
-                              // 点击的时候获取当前 widget 的位置，传入 overlayEntry
-                              var _overlayEntry = OverlayEntry(builder: (_) {
-                                var offset =
-                                    (context.findRenderObject() as RenderBox)
-                                        .localToGlobal(Offset.zero);
-                                return RedDotPage(
-                                  startPosition: offset,
-                                  endPosition: _endOffset,
-                                  milliseconds: 500,
-                                );
-                              });
-                              // 显示Overlay
-                              Overlay.of(context)?.insert(_overlayEntry);
-                              // 等待动画结束
-                              Future.delayed(Duration(milliseconds: 500), () {
-                                _overlayEntry.remove();
-                              });
-                            },
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                );
-              },
-              itemCount: 100,
-            ),
-          ),
-          Container(
-            height: 1,
-            color: Colors.grey.withOpacity(0.5),
-          ),
-          Container(
-            height: 60,
-            color: Colors.white,
-            child: Row(
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.only(left: 20),
-                  child: Icon(
-                    Icons.shop_two,
-                    key: _key,
-                  ),
-                )
-              ],
-            ),
-          )
-        ],
       ),
     );
-  }
-}
-
-class RedDotPage extends StatefulWidget {
-  final Offset? startPosition;
-  final Offset? endPosition;
-  final int? milliseconds;
-
-  const RedDotPage(
-      {Key? key, this.startPosition, this.endPosition, this.milliseconds})
-      : super(key: key);
-
-  @override
-  _RedDotPageState createState() => _RedDotPageState();
-}
-
-class _RedDotPageState extends State<RedDotPage>
-    with SingleTickerProviderStateMixin {
-  AnimationController? _controller; // 动画 controller
-  Animation<double>? _animation; // 动画
-  double left = 100; // 小圆点的left（动态计算）
-  double top = 0; // 小远点的right（动态计算）
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-        duration: Duration(milliseconds: widget.milliseconds!), vsync: this);
-    _animation = Tween(begin: 0.0, end: 1.0).animate(_controller!);
-
-    // 二阶贝塞尔曲线用值
-    var x0 = widget.startPosition!.dx;
-    var y0 = widget.startPosition!.dy;
-
-    ///调整第二个点的值，动画路径就不一一
-    var x1 = widget.startPosition!.dx - -100;
-    var y1 = widget.startPosition!.dy - 0;
-
-    var x2 = widget.endPosition!.dx;
-    var y2 = widget.endPosition!.dy;
-
-    _animation!.addListener(() {
-      // t 动态变化的值
-      var t = _animation!.value;
-      if (mounted)
-        setState(() {
-          left = pow(1 - t, 2) * x0 + 2 * t * (1 - t) * x1 + pow(t, 2) * x2;
-          top = pow(1 - t, 2) * y0 + 2 * t * (1 - t) * y1 + pow(t, 2) * y2;
-        });
-    });
-
-    // 初始化小圆点的位置
-    left = widget.startPosition!.dx;
-    top = widget.startPosition!.dy;
-
-    // 显示小圆点的时候动画就开始
-    _controller!.forward();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // 用 Stack -> Positioned 来控制小圆点的位置
-    return Positioned(
-      left: left,
-      top: top,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipOval(
-            child: Container(
-              width: 14,
-              height: 14,
-              color: Colors.red,
-            ),
-          ),
-          Text(
-            "left:$left",
-            style: TextStyle(fontSize: 12),
-          ),
-          Text(
-            "top:$top",
-            style: TextStyle(fontSize: 12),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller?.dispose();
-    super.dispose();
   }
 }

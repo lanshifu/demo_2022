@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class LearnExpansionPanelList extends StatefulWidget {
   @override
@@ -182,11 +181,11 @@ class _LearnExpansionPanelList extends State<LearnExpansionPanelList>
     return Container(
       margin: EdgeInsets.all(20),
       padding: EdgeInsets.all(20),
-      width: double.infinity,
-      height: 166,
+      width: 335,
+      height: 70,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(100),
       ),
       child: Column(
         children: [
@@ -239,67 +238,6 @@ class _LearnExpansionPanelList extends State<LearnExpansionPanelList>
           const SizedBox(
             height: 16,
           ),
-
-          /// 底部按钮
-          SizedBox(
-            height: 46,
-            child: Stack(
-              children: [
-                Positioned(
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  child: Consumer(
-                    builder:
-                        (BuildContext context, WidgetRef ref, Widget? child) {
-                      return Container(
-                        width: 136,
-                        decoration: BoxDecoration(
-                          color: Colors.black12,
-                          borderRadius: BorderRadius.circular(25),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            '拒绝',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  bottom: 0,
-                  child: Consumer(
-                    builder:
-                        (BuildContext context, WidgetRef ref, Widget? child) {
-                      return Container(
-                        width: 136,
-                        decoration: BoxDecoration(
-                          color: Colors.black,
-                          borderRadius: BorderRadius.circular(25),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            '同意连麦',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          )
         ],
       ),
     );
